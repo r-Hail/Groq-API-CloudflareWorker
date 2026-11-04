@@ -15,7 +15,7 @@
 
 ### 适用场景
 
-Groq（https://groq.com） 
+Groq https://groq.com 
 
 是响应速度极快的免费 AI 推理平台之一（自研 LPU 芯片），这个项目解决两个常见问题：
 
