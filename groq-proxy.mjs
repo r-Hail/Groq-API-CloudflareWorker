@@ -41,6 +41,7 @@ export default {
         delete data.top_k;
         delete data.min_p;
         delete data.top_a;
+        data.stream = false;
         body = JSON.stringify(data);
         headers.delete("content-length");
       } catch (e) {
@@ -52,7 +53,6 @@ export default {
       method: request.method,
       headers,
       body,
-      duplex: "half",
     });
 
     const outHeaders = new Headers(resp.headers);
