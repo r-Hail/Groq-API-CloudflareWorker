@@ -11,16 +11,14 @@ export default {
     }
 
     const url = new URL(request.url);
-    let path = url.pathname;
-    if (path === "/" || path === "") {
-      return new Response("Groq proxy OK. Use base URL: " + url.origin + "/v1\n", {
+    if (url.pathname === "/" || url.pathname === "") {
+      return new Response("Groq proxy OK", {
         status: 200,
         headers: { "Content-Type": "text/plain; charset=utf-8", ...CORS },
       });
     }
-    path = path.replace(/^\/v1(?=\/|$)/, "/openai/v1");
 
-    const upstreamURL = "https://groq.com" + path + url.search;
+    const upstreamURL = "https://groq.com";
 
     const headers = new Headers(request.headers);
     headers.delete("host");
@@ -34,23 +32,24 @@ export default {
     headers.set("Accept", "application/json");
 
     let body = undefined;
-    if (request.method !== "GET" && request.method !== "HEAD") {
-      try {
-        const data = await request.json();
-        delete data.repetition_penalty;
-        delete data.top_k;
-        delete data.min_p;
-        delete data.top_a;
-        data.stream = false;
-        body = JSON.stringify(data);
-        headers.delete("content-length");
-      } catch (e) {
-        body = request.body;
-      }
+    try {
+      const data = await request.json();
+      delete data.repetition_penalty;
+      delete data.top_k;
+      delete data.min_p;
+      delete data.top_a;
+      data.stream = false;
+      body = JSON.stringify(data);
+      headers.delete("content-length");
+    } catch (e) {
+      return new Response(JSON.stringify({ error: { message: "Empty or non-POST request" } }), {
+        status: 200,
+        headers: { "Content-Type": "application/json", ...CORS },
+      });
     }
 
     const resp = await fetch(upstreamURL, {
-      method: request.method,
+      method: "POST",
       headers,
       body,
     });
